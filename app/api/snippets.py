@@ -28,7 +28,7 @@ async def create_snippet(data: SnippetCreate, db: AsyncSession = Depends(get_db)
 @router.get("/{snippet_id}")
 async def get_snippet(snippet_id: int, db: AsyncSession = Depends(get_db)):
     q = await db.execute(select(Snippet).where(Snippet.id == snippet_id))
-    snippet = q.scalar_one_or_none()  # <-- returns None if not found
+    snippet = q.scalar_one_or_none()
     if snippet is None:
         raise HTTPException(status_code=404, detail="Snippet not found")
     return snippet
