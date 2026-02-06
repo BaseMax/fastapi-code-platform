@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import HTTPException, APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.db.session import SessionLocal
@@ -25,7 +25,10 @@ async def create_snippet(data: SnippetCreate, db: AsyncSession = Depends(get_db)
     return snippet
 
 
-@router.get("/{snippet_id}", response_model=SnippetOut)
+@router.get("/{snippet_id}")
 async def get_snippet(snippet_id: int, db: AsyncSession = Depends(get_db)):
     q = await db.execute(select(Snippet).where(Snippet.id == snippet_id))
-    return q.scalar_one()
+    snippet = q.scalar_one_or_none()  # <-- returns None if not found
+    if snippet is None:
+        raise HTTPException(status_code=404, detail="Snippet not found")
+    return snippet
